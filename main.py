@@ -14,12 +14,13 @@ VALID_TOKEN = "HonerOmerL140450#&@1404"
 # ========================
 # 🎯 مراحل مکالمه
 # ========================
-ASK_TOKEN, ASK_Q1, ASK_Q2, ASK_Q3, ASK_Q4 = range(5)
+ASK_TOKEN, ASK_Q1, ASK_Q2, ASK_Q3, ASK_Q4, ASK_Q5 = range(6)
 questions = [
     "❓ سوال ۱: نام کامل خود را وارد نمایید",
     "❓ سوال ۲: شماره ملی خود را وارد نمایید",
     "❓ سوال ۳: شماره تماس خود را وارد نمایید",
-    "❓ سوال ۴: لطفاً عکس باکس پایین QR کد را ارسال نمایید"
+    "❓ سوال ۴: شماره اثر خود را وارد نمایید",
+    "❓ سوال ۵: لطفاً عکس باکس پایین QR کد را ارسال نمایید"
 ]
 user_data = {}
 
@@ -55,15 +56,18 @@ async def ask_q2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ASK_Q3
 
 async def ask_q3(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.from_user.id
-    user_data[user_id]["answers"].append(update.message.text)
+    user_data[update.message.from_user.id]["answers"].append(update.message.text)
     await update.message.reply_text(questions[2])
     return ASK_Q4
 
 async def ask_q4(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.from_user.id
-    user_data[user_id]["answers"].append(update.message.text)
+    user_data[update.message.from_user.id]["answers"].append(update.message.text)
     await update.message.reply_text(questions[3])
+    return ASK_Q5
+
+async def ask_q5(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_data[update.message.from_user.id]["answers"].append(update.message.text)
+    await update.message.reply_text(questions[4])
     return ConversationHandler.END
 
 async def finish(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -75,8 +79,10 @@ async def finish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     answers = user_data[user_id]["answers"]
 
     msg = f"✅ ثبت‌نام جدید:\n\n🔑 توکن: {token}\n\n"
-    for i in range(3):
+    for i in range(4):  # بدون عکس
         msg += f"{i+1}. {questions[i]} {answers[i]}\n"
+
+    msg += f"5. {questions[4]}"
 
     await context.bot.send_message(chat_id=ADMIN_ID, text=msg)
 
@@ -103,3 +109,19 @@ def main():
         ],
         states={
             ASK_Q1: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_token)],
+            ASK_Q2: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q2)],
+            ASK_Q3: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q3)],
+            ASK_Q4: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q4)],
+            ASK_Q5: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q5),
+                MessageHandler(filters.PHOTO, finish)
+            ]
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+
+    app.add_handler(conv)
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
