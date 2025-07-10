@@ -4,11 +4,17 @@ from telegram.ext import (
     ConversationHandler, ContextTypes
 )
 
+# ========================
+# 🔐 اطلاعات اصلی پروژه
+# ========================
 BOT_TOKEN = "7318022480:AAFN-AvEXPuxMx-Ah0VTlDwkvq19QjGXiVs"
 ADMIN_ID = 988260745
 VALID_TOKEN = "HonerOmerL140450#&@1404"
 
-ASK_TOKEN, ASK_Q1, ASK_Q2, ASK_Q3, ASK_Q4, ASK_Q5 = range(6)
+# ========================
+# 🎯 مراحل مکالمه
+# ========================
+ASK_TOKEN, ASK_Q1, ASK_Q2, ASK_Q3, ASK_Q4 = range(5)
 questions = [
     "❓ سوال ۱: نام کامل خود را وارد نمایید",
     "❓ سوال ۲: شماره ملی خود را وارد نمایید",
@@ -17,6 +23,9 @@ questions = [
 ]
 user_data = {}
 
+# ========================
+# 🚀 شروع
+# ========================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [["Register"]]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -55,7 +64,7 @@ async def ask_q4(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     user_data[user_id]["answers"].append(update.message.text)
     await update.message.reply_text(questions[3])
-    return ASK_Q5
+    return ConversationHandler.END
 
 async def finish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
@@ -81,6 +90,9 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("⛔️ عملیات لغو شد.")
     return ConversationHandler.END
 
+# ========================
+# 🧠 اجرای ربات
+# ========================
 def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -91,17 +103,3 @@ def main():
         ],
         states={
             ASK_Q1: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_token)],
-            ASK_Q2: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q2)],
-            ASK_Q3: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q3)],
-            ASK_Q4: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q4)],
-            ASK_Q5: [MessageHandler(filters.PHOTO, finish)],
-        },
-        fallbacks=[CommandHandler("cancel", cancel)],
-    )
-
-    app.add_handler(conv)
-    print("🤖 ربات در حال اجراست...")
-    app.run_polling()
-
-if __name__ == "__main__":
-    main()
