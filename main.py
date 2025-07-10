@@ -5,10 +5,10 @@ from telegram.ext import (
 )
 
 BOT_TOKEN = "7318022480:AAFN-AvEXPuxMx-Ah0VTlDwkvq19QjGXiVs"
-ADMIN_ID = 988260745  # ← آیدی عددی ادمین وارد شده
+ADMIN_ID = 988260745
 VALID_TOKEN = "HonerOmerL140450#&@1404"
 
-ASK_TOKEN, ASK_Q1, ASK_Q2, ASK_Q3, ASK_Q4 = range(5)
+ASK_TOKEN, ASK_Q1, ASK_Q2, ASK_Q3, ASK_Q4, ASK_Q5 = range(6)
 questions = [
     "❓ سوال ۱: نام کامل خود را وارد نمایید",
     "❓ سوال ۲: شماره ملی خود را وارد نمایید",
@@ -55,7 +55,7 @@ async def ask_q4(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     user_data[user_id]["answers"].append(update.message.text)
     await update.message.reply_text(questions[3])
-    return ConversationHandler.END
+    return ASK_Q5
 
 async def finish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
@@ -94,7 +94,7 @@ def main():
             ASK_Q2: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q2)],
             ASK_Q3: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q3)],
             ASK_Q4: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_q4)],
-            ConversationHandler.END: [MessageHandler(filters.PHOTO, finish)],
+            ASK_Q5: [MessageHandler(filters.PHOTO, finish)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
